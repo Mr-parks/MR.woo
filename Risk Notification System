@@ -1,0 +1,116 @@
+#define SoundSensorPin A1  //소리감지센서를 아두이노 아날로그 A1에 연결
+#define VREF  5.0  //voltage on AREF pin,default:operating voltage
+int buttonState = 0;
+
+void setup()
+{
+    Serial.begin(9600);
+    pinMode(2, OUTPUT); //진동센서
+    pinMode(3, OUTPUT); //첫번째 LED
+    pinMode(4, OUTPUT); //두번째 LED
+    pinMode(5, OUTPUT); //세번째 LED
+    pinMode(6, OUTPUT); //네번째 LED
+    pinMode(7, OUTPUT); //다섯번째 LED
+    pinMode(8, OUTPUT); // 초음파 센서의 발신부
+    pinMode(9, OUTPUT);// 초음파 센서의 수신부
+    pinMode(10, OUTPUT); // 초음파 센서 동작 스위치의 on/off를 표시하는 LED
+    pinMode(11, INPUT); // 스위치
+}
+
+void loop()
+{
+    float voltageValue,dbValue;
+    voltageValue = analogRead(SoundSensorPin) / 1024.0 * VREF;
+    dbValue = voltageValue * 50.0;  // 전압을 데시벨 값으로 변환
+    Serial.print(dbValue,1); // 데시벨의 크기를 소수점 첫째짜리까지 표현함
+    Serial.println(" dBA"); // 데시벨의 단위를 데시벨의 크기 뒤에 붙여줌 
+    delay(500); // 0.5초 간격으로 데시벨 측정
+
+
+     buttonState = digitalRead(4); //3번 핀의 상태를 읽어들여 buttonState변수에 저장
+ 
+  if (buttonState == HIGH) {
+    digitalWrite(10, HIGH); // 스위치가 HIGH 상태, 즉 초음파 센서가 동작하는 상황이면 LED 점등
+
+    digitalWrite(8, HIGH);
+    delayMicroseconds(10);
+    digitalWrite(8, LOW);
+
+    int distance = pulseIn(9, HIGH) * 340 / 2 / 10000; 
+    //1초에 340m를 가는소리를 왕복이므로 2로 나누고 cm로 환산하기 위해 10000으로 나눔
+    Serial.print(distance);
+    Serial.println("cm");
+    delay(500); //0.5초 간격으로 거리를 측정
+
+    if (distance <= 150)
+    {
+      digitalWrite(2, HIGH);
+      delay(100);
+      digitalWrite(2, LOW);
+      delay(1000); // 거리가 1.5m 이하일 때 진동센서 on 
+    }
+  }
+  else {
+    digitalWrite(2, LOW);
+  
+  delay(100); 
+  } // 거리가 1.5m 이하가 아닐 때 진동센서 off
+
+ 
+    if ( dbValue >= 60)
+{
+   digitalWrite (2, HIGH); // 진동센서 on
+  digitalWrite (3, HIGH); // 첫번째 LED on
+  delay (100); 
+  digitalWrite (2, LOW); // 진동센서 off
+  digitalWrite (3, LOW); // 첫번째 LED off
+  delay (100); 
+  
+}
+ if (dbValue >= 70)
+{
+  
+digitalWrite (4, HIGH); // 두번째 LED on
+
+  delay (100); 
+  
+ 
+  digitalWrite (4, LOW);  // 두번째 LED off
+  delay (100);
+}
+if (dbValue>= 80)
+{
+
+digitalWrite (5, HIGH); //  // 세번째 LED on
+  delay (100); // 
+
+  digitalWrite (5, LOW); //  // 세번째 LED off
+  delay (100);
+}
+if (dbValue>= 90)
+{
+  
+digitalWrite (6, HIGH); // LED를 켭니다 (HIGH는 전압 레벨). // 네번째 LED on
+  delay (100); // 두 번째를 기다립니다.
+  
+  digitalWrite (6, LOW); // 네번째 LED off
+  delay (100);
+}
+ if (dbValue >=100)
+{
+  
+digitalWrite (7, HIGH); // 다섯번째 LED on
+  delay (100); 
+  digitalWrite (7, LOW);   // 다번째 LED off
+  delay (100);
+}
+else;{
+digitalWrite(2, LOW);
+ digitalWrite (3, LOW); 
+  digitalWrite (4, LOW);
+  digitalWrite (5, LOW); 
+  digitalWrite (6, LOW); 
+  digitalWrite (7, LOW); // 모든LED와 진동센서를 off
+  delay (10);
+}
+}
